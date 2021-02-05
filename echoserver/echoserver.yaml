@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echoserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: echoserver
+  template:
+    metadata:
+      labels:
+        app: echoserver
+    spec:
+      containers:
+      - name: echoserver
+        image: imroc.tencentcloudcr.com/test/echoserver:v1
+        imagePullPolicy: Always
+        command:
+        - /echoserver
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: echoserver
+  labels:
+    app: echoserver
+spec:
+  type: ClusterIP
+  ports:
+  - port: 9000
+    protocol: TCP
+    name: grpc-echoserver
+  - port: 9001
+    protocol: TCP
+    name: http-metrics
+  selector:
+    app: echoserver

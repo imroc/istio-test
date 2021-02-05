@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ghz
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ghz
+  template:
+    metadata:
+      labels:
+        app: ghz
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - topologyKey: "kubernetes.io/hostname"
+            labelSelector:
+              matchLabels:
+                app: echoserver
+      volumes:
+      - name: proto
+        configMap:
+          name: proto
+      containers:
+      - name: ghz
+        image: imroc.tencentcloudcr.com/test/ghz:latest
+        imagePullPolicy: Always
+        command:
+        - sleep
+        - 24h
+        volumeMounts:
+        - mountPath: /chat.proto
+          name: proto
+          subPath: chat.proto
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app: ghz
+  name: proto
+data:
+  chat.proto: |-
+    syntax = "proto3";
+    package chat;
+    option go_package = "github.com/imroc/istio-test/chat";
+
+    message Message {
+      string body = 1;
+    }
+
+    service ChatService {
+      rpc SayHello(Message) returns (Message) {}
+    }

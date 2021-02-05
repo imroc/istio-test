@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: benchechoclient
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: benchechoclient
+  template:
+    metadata:
+      labels:
+        app: benchechoclient
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: "kubernetes.io/hostname"
+              labelSelector:
+                matchLabels:
+                  app: echoserver
+      containers:
+      - name: benchechoclient
+        image: imroc.tencentcloudcr.com/test/benchechoclient:v1
+        imagePullPolicy: Always
+        command:
+        - sleep
+        - 24h
